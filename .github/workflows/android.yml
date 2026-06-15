@@ -9,8 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Setup Node
       uses: actions/setup-node@v4
@@ -21,18 +20,16 @@ jobs:
       run: npm install -g cordova
 
     - name: Install dependencies
-      run: |
-        cd mobileapp
-        npm install || true
+      run: npm install
 
-    - name: Build Android
-      run: |
-        cd mobileapp
-        cordova platform add android@14 || true
-        cordova build android
+    - name: Install Android platform
+      run: cordova platform add android@14
+
+    - name: Build APK
+      run: cordova build android
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: localwab-apk
-        path: mobileapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
