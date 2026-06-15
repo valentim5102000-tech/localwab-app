@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LocalWab PRO MAX</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+min-height:100vh;
+}
+
+header{
+background:#020617;
+padding:20px;
+text-align:center;
+box-shadow:0 0 10px rgba(0,0,0,.4);
+}
+
+.logo{
+font-size:28px;
+font-weight:bold;
+color:#22c55e;
+}
+
+.subtitle{
+font-size:14px;
+color:#94a3b8;
+margin-top:5px;
+}
+
+.container{
+max-width:500px;
+margin:auto;
+padding:15px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+margin-top:15px;
+}
+
+h3{
+margin-bottom:15px;
+}
+
+.switch{
+display:flex;
+gap:5px;
+}
+
+.switch button{
+flex:1;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#334155;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.active{
+background:#22c55e !important;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+background:#334155;
+color:white;
+}
+
+.passwordBox{
+position:relative;
+}
+
+.eye{
+position:absolute;
+right:15px;
+top:22px;
+cursor:pointer;
+font-size:18px;
+}
+
+button.mainBtn{
+width:100%;
+padding:12px;
+margin-top:15px;
+border:none;
+border-radius:8px;
+background:#22c55e;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+button.mainBtn:hover{
+opacity:.9;
+}
+
+.link{
+margin-top:15px;
+text-align:center;
+color:#60a5fa;
+cursor:pointer;
+}
+
+.hidden{
+display:none;
+}
+
+.footer{
+text-align:center;
+padding:20px;
+color:#94a3b8;
+font-size:12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+🚖 LOCALWAB
+</div>
+
+<div class="subtitle">
+Mobilidade Inteligente de Angola
+</div>
+
+</header>
+
+<div class="container">
+
+<!-- TIPO DE CONTA -->
+
+<div class="card">
+
+<h3>Tipo de Conta</h3>
+
+<div class="switch">
+
+<button id="btnUser"
+class="active"
+onclick="setType('user')">
+
+👤 Usuário
+
+</button>
+
+<button id="btnMotorista"
+onclick="setType('motorista')">
+
+🚐 Motorista
+
+</button>
+
+<button id="btnEmpresa"
+onclick="setType('empresa')">
+
+🏢 Empresa
+
+</button>
+
+<button id="btnAdmin"
+onclick="setType('admin')">
+
+👑 Admin
+
+</button>
+
+</div>
+
+</div>
+
+<!-- REGISTO -->
+
+<div class="card">
+
+<h3 id="formTitle">
+Criar Conta de Usuário
+</h3>
+
+<!-- USER -->
+
+<div id="userForm">
+
+<input
+id="userNome"
+placeholder="Nome Completo">
+
+<input
+id="userTelefone"
+placeholder="Telefone">
+
+<div class="passwordBox">
+
+<input
+id="userSenha"
+type="password"
+placeholder="Senha">
+
+<span
+class="eye"
+onclick="togglePassword('userSenha')">
+
+👁️
+
+</span>
+
+</div>
+
+</div>
+
+<!-- MOTORISTA -->
+
+<div id="motoristaForm" class="hidden">
+
+<input
+id="motoristaNome"
+placeholder="Nome do Motorista">
+
+<input
+id="motoristaTelefone"
+placeholder="Telefone">
+
+<div class="passwordBox">
+
+<input
+id="motoristaSenha"
+type="password"
+placeholder="Senha">
+
+<span
+class="eye"
+onclick="togglePassword('motoristaSenha')">
+
+👁️
+
+</span>
+
+</div>
+
+</div>
+
+<!-- EMPRESA -->
+
+<div id="empresaForm" class="hidden">
+
+<input
+id="empresaNome"
+placeholder="Nome da Empresa">
+
+<input
+id="empresaTelefone"
+placeholder="Telefone">
+
+<div class="passwordBox">
+
+<input
+id="empresaSenha"
+type="password"
+placeholder="Senha">
+
+<span
+class="eye"
+onclick="togglePassword('empresaSenha')">
+
+👁️
+
+</span>
+
+</div>
+
+</div>
+
+<!-- ADMIN -->
+
+<div id="adminForm" class="hidden">
+
+<input
+id="adminNome"
+placeholder="Nome do Admin">
+
+<input
+id="adminTelefone"
+placeholder="Telefone">
+
+<div class="passwordBox">
+
+<input
+id="adminSenha"
+type="password"
+placeholder="Senha">
+
+<span
+class="eye"
+onclick="togglePassword('adminSenha')">
+
+👁️
+
+</span>
+
+</div>
+
+</div>
+
+<button
+class="mainBtn"
+onclick="register()">
+
+CRIAR CONTA
+
+</button>
+
+</div>
+
+<!-- LOGIN -->
+
+<div class="card">
+
+<h3>
+Entrar no Sistema
+</h3>
+
+<input
+id="loginTelefone"
+placeholder="Telefone">
+
+<div class="passwordBox">
+
+<input
+id="loginSenha"
+type="password"
+placeholder="Senha">
+
+<span
+class="eye"
+onclick="togglePassword('loginSenha')">
+
+👁️
+
+</span>
+
+</div>
+
+<button
+class="mainBtn"
+onclick="login()">
+
+ENTRAR
+
+</button>
+
+<div
+class="link"
+onclick="resetPassword()">
+
+🔑 Esqueci a Senha
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+LocalWab PRO MAX © 2026
+
+</div>
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+firebase.initializeApp({
+
+apiKey:"AIzaSyDG44wGTJtdINCaVFCFxRJsninm-KwRTDI",
+authDomain:"localwabapp.firebaseapp.com",
+projectId:"localwabapp",
+storageBucket:"localwabapp.firebasestorage.app",
+messagingSenderId:"61456899292",
+appId:"1:61456899292:web:3f4dc071bcf74471ed2819"
+
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentType = "user";
+
+/* ================= MOSTRAR SENHA ================= */
+
+function togglePassword(id){
+
+const field = document.getElementById(id);
+
+if(field.type==="password"){
+field.type="text";
+}else{
+field.type="password";
+}
+
+}
+
+/* ================= VALIDAR TELEFONE ================= */
+
+function validarTelefone(telefone){
+
+telefone = telefone.trim();
+
+if(telefone.length !== 9){
+return false;
+}
+
+if(isNaN(telefone)){
+return false;
+}
+
+return true;
+
+}
+
+/* ================= TROCAR TIPO ================= */
+
+function setType(type){
+
+currentType = type;
+
+document.getElementById("userForm").classList.add("hidden");
+document.getElementById("motoristaForm").classList.add("hidden");
+document.getElementById("empresaForm").classList.add("hidden");
+document.getElementById("adminForm").classList.add("hidden");
+
+document.getElementById("btnUser").classList.remove("active");
+document.getElementById("btnMotorista").classList.remove("active");
+document.getElementById("btnEmpresa").classList.remove("active");
+document.getElementById("btnAdmin").classList.remove("active");
+
+if(type==="user"){
+
+document.getElementById("userForm").classList.remove("hidden");
+document.getElementById("btnUser").classList.add("active");
+document.getElementById("formTitle").innerText =
+"Criar Conta de Usuário";
+
+}
+
+if(type==="motorista"){
+
+document.getElementById("motoristaForm").classList.remove("hidden");
+document.getElementById("btnMotorista").classList.add("active");
+document.getElementById("formTitle").innerText =
+"Criar Conta de Motorista";
+
+}
+
+if(type==="empresa"){
+
+document.getElementById("empresaForm").classList.remove("hidden");
+document.getElementById("btnEmpresa").classList.add("active");
+document.getElementById("formTitle").innerText =
+"Criar Conta de Empresa";
+
+}
+
+if(type==="admin"){
+
+document.getElementById("adminForm").classList.remove("hidden");
+document.getElementById("btnAdmin").classList.add("active");
+document.getElementById("formTitle").innerText =
+"Criar Conta de Admin";
+
+}
+
+}
+
+/* ================= REGISTO ================= */
+
+async function register(){
+
+try{
+
+let nome = "";
+let telefone = "";
+let senha = "";
+let tipo = "";
+
+if(currentType==="user"){
+
+nome =
+document.getElementById("userNome").value;
+
+telefone =
+document.getElementById("userTelefone").value;
+
+senha =
+document.getElementById("userSenha").value;
+
+tipo = "user";
+
+}
+
+if(currentType==="motorista"){
+
+nome =
+document.getElementById("motoristaNome").value;
+
+telefone =
+document.getElementById("motoristaTelefone").value;
+
+senha =
+document.getElementById("motoristaSenha").value;
+
+tipo = "motorista";
+
+}
+
+if(currentType==="empresa"){
+
+nome =
+document.getElementById("empresaNome").value;
+
+telefone =
+document.getElementById("empresaTelefone").value;
+
+senha =
+document.getElementById("empresaSenha").value;
+
+tipo = "empresa";
+
+}
+
+if(currentType==="admin"){
+
+nome =
+document.getElementById("adminNome").value;
+
+telefone =
+document.getElementById("adminTelefone").value;
+
+senha =
+document.getElementById("adminSenha").value;
+
+tipo = "admin";
+
+}
+
+if(!validarTelefone(telefone)){
+
+alert("Telefone inválido. Deve ter 9 dígitos.");
+
+return;
+
+}
+
+const email =
+telefone + "@localwab.app";
+
+const res =
+await auth.createUserWithEmailAndPassword(
+email,
+senha
+);
+
+await db.collection("users")
+.doc(res.user.uid)
+.set({
+
+uid: res.user.uid,
+nome: nome,
+telefone: telefone,
+tipo: tipo,
+status: "ativo",
+createdAt: Date.now()
+
+});
+
+alert("Conta criada com sucesso!");
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+/* ================= LOGIN ================= */
+
+async function login(){
+
+try{
+
+const telefone =
+document.getElementById("loginTelefone").value;
+
+const senha =
+document.getElementById("loginSenha").value;
+
+if(!validarTelefone(telefone)){
+
+alert("Telefone inválido");
+
+return;
+
+}
+
+const email =
+telefone + "@localwab.app";
+
+const res =
+await auth.signInWithEmailAndPassword(
+email,
+senha
+);
+
+const uid = res.user.uid;
+
+const doc =
+await db.collection("users")
+.doc(uid)
+.get();
+
+if(!doc.exists){
+
+alert("Conta não encontrada");
+
+return;
+
+}
+
+const tipo = doc.data().tipo;
+
+if(tipo==="user"){
+
+window.location.href =
+"usuario.html";
+
+}
+
+if(tipo==="motorista"){
+
+window.location.href =
+"drivers.html";
+
+}
+
+if(tipo==="empresa"){
+
+window.location.href =
+"empresa.html";
+
+}
+
+if(tipo==="admin"){
+
+window.location.href =
+"admin.html";
+
+}
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+/* ================= RECUPERAR SENHA ================= */
+
+async function resetPassword(){
+
+const telefone =
+prompt("Digite o telefone da conta");
+
+if(!telefone) return;
+
+if(!validarTelefone(telefone)){
+
+alert("Telefone inválido");
+
+return;
+
+}
+
+try{
+
+const email =
+telefone + "@localwab.app";
+
+await auth.sendPasswordResetEmail(
+email
+);
+
+alert(
+"Email de recuperação enviado!"
+);
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+/* INIT */
+setType("user");
+
+</script>
+
+</body>
+</html>

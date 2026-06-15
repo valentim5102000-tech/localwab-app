@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LocalWab - Usuário</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+header{
+background:#020617;
+padding:15px;
+text-align:center;
+font-weight:bold;
+}
+
+.container{padding:15px;}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+input,button{
+width:100%;
+padding:12px;
+margin-top:8px;
+border:none;
+border-radius:8px;
+}
+
+button{
+background:#22c55e;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.status{
+background:#334155;
+padding:10px;
+border-radius:8px;
+margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>🟢 LOCALWAB USUÁRIO</header>
+
+<div class="container">
+
+<!-- GPS -->
+<div class="card">
+<h3>📍 Minha Localização (GPS)</h3>
+<p>Latitude: <span id="lat">--</span></p>
+<p>Longitude: <span id="lng">--</span></p>
+<p id="gpsStatus">A iniciar GPS...</p>
+</div>
+
+<!-- PEDIR VIAGEM -->
+<div class="card">
+<h3>🚐 Pedir Viagem</h3>
+
+<input id="destino" placeholder="Destino">
+
+<button onclick="pedirViagem()">PEDIR VIAGEM</button>
+
+<p id="statusBtn"></p>
+</div>
+
+<!-- STATUS -->
+<div class="card">
+<h3>📊 Estado da Viagem</h3>
+<div id="statusViagem">Nenhuma viagem ativa</div>
+</div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+apiKey:"AIzaSyDG44wGTJtdINCaVFCFxRJsninm-KwRTDI",
+authDomain:"localwabapp.firebaseapp.com",
+projectId:"localwabapp",
+storageBucket:"localwabapp.firebasestorage.app",
+messagingSenderId:"61456899292",
+appId:"1:61456899292:web:3f4dc071bcf74471ed2819"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let userLat = null;
+let userLng = null;
+
+/* AUTH */
+auth.onAuthStateChanged(user=>{
+currentUser = user;
+
+if(user){
+trackViagem();
+}
+});
+
+/* GPS */
+function startGPS(){
+
+if(!navigator.geolocation){
+alert("GPS não suportado");
+return;
+}
+
+navigator.geolocation.watchPosition(pos=>{
+
+userLat = pos.coords.latitude;
+userLng = pos.coords.longitude;
+
+document.getElementById("lat").innerText = userLat;
+document.getElementById("lng").innerText = userLng;
+document.getElementById("gpsStatus").innerText = "GPS ativo";
+
+}, err=>{
+document.getElementById("gpsStatus").innerText = "Erro no GPS";
+});
+}
+
+/* PEDIR VIAGEM */
+async function pedirViagem(){
+
+if(!currentUser){
+alert("Faz login primeiro");
+return;
+}
+
+const destino = document.getElementById("destino").value;
+
+if(!destino){
+alert("Preenche o destino");
+return;
+}
+
+if(userLat === null || userLng === null){
+alert("Aguarda o GPS ativar");
+return;
+}
+
+/* BUSCAR MOTORISTA (VEICULOS) */
+const snap = await db.collection("veiculos")
+.where("status","==","ativo")
+.limit(1)
+.get();
+
+let veiculoId = null;
+let motoristaNome = null;
+
+snap.forEach(doc=>{
+veiculoId = doc.id;
+motoristaNome = doc.data().motorista;
+});
+
+/* CRIAR VIAGEM */
+await db.collection("viagens").add({
+userId: currentUser.uid,
+origemLat: userLat,
+origemLng: userLng,
+destino: destino,
+status: "pendente",
+veiculoAtribuido: veiculoId || null,
+motoristaId: null,
+motorista: null,
+createdAt: Date.now()
+});
+
+document.getElementById("statusBtn").innerText = "Viagem enviada 🚐";
+
+}
+
+/* TRACK VIAGEM */
+function trackViagem(){
+
+db.collection("viagens")
+.where("userId","==",currentUser.uid)
+.onSnapshot(snap=>{
+
+snap.forEach(doc=>{
+
+const v = doc.data();
+
+document.getElementById("statusViagem").innerHTML = `
+📍 Status: ${v.status}<br>
+🚐 Motorista: ${v.motorista || "aguardando"}<br>
+🚗 Veículo: ${v.veiculoAtribuido || "sem atribuição"}
+`;
+
+});
+
+});
+
+}
+
+/* START GPS */
+startGPS();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LOCALWAB CONTROL CENTER</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+header{
+background:#020617;
+padding:15px;
+text-align:center;
+font-weight:bold;
+font-size:18px;
+}
+
+.container{padding:15px;}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+margin-bottom:10px;
+}
+
+input,button{
+width:100%;
+padding:10px;
+margin:5px 0;
+border-radius:6px;
+border:none;
+}
+
+button{
+background:#22c55e;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.item{
+background:#334155;
+padding:10px;
+border-radius:8px;
+margin-top:8px;
+}
+
+.log{
+background:#0f172a;
+padding:10px;
+border-radius:8px;
+font-size:13px;
+white-space:pre-line;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>📡 LOCALWAB CONTROLO CENTRAL EMPRESA</header>
+
+<div class="container">
+
+<!-- 🏢 ADD MOTORISTA -->
+<div class="card">
+<h3>➕ Adicionar Motorista</h3>
+
+<input id="driverId" placeholder="Motorista ID">
+<input id="driverName" placeholder="Nome do motorista">
+<input id="driverPhone" placeholder="Telefone">
+<input id="driverRoute" placeholder="Rota (ex: Zango - Benfica)">
+
+<button onclick="addDriver()">Adicionar Motorista</button>
+</div>
+
+<!-- 🚐 MOTORISTAS -->
+<div class="card">
+<h3>🚐 Motoristas ao Vivo</h3>
+<div id="drivers"></div>
+</div>
+
+<!-- 📦 VIAGENS -->
+<div class="card">
+<h3>📦 Viagens ao Vivo</h3>
+<div id="trips"></div>
+</div>
+
+<!-- 🔥 LOGS -->
+<div class="card">
+<h3>🔥 Sinais do Sistema</h3>
+<div id="logs" class="log"></div>
+</div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+firebase.initializeApp({
+apiKey:"AIzaSyDG44wGTJtdINCaVFCFxRJsninm-KwRTDI",
+projectId:"localwabapp"
+});
+
+const db = firebase.firestore();
+
+/* 🏢 EMPRESA (DEMO) */
+const empresaId = "empresa_demo";
+
+/* 📡 LOG SYSTEM */
+let logs = [];
+
+function addLog(msg){
+logs.unshift("[" + new Date().toLocaleTimeString() + "] " + msg);
+if(logs.length > 15) logs.pop();
+document.getElementById("logs").innerText = logs.join("\n");
+}
+
+/* ➕ ADD DRIVER */
+async function addDriver(){
+
+const id = document.getElementById("driverId").value;
+const name = document.getElementById("driverName").value;
+const phone = document.getElementById("driverPhone").value;
+const route = document.getElementById("driverRoute").value;
+
+if(!id || !name || !phone || !route){
+alert("Preenche todos os campos");
+return;
+}
+
+await db.collection("veiculos").doc(id).set({
+empresaId,
+driverId:id,
+name,
+phone,
+route,
+status:"ativo",
+createdAt:new Date()
+});
+
+addLog("➕ Motorista adicionado: " + name);
+
+document.getElementById("driverId").value="";
+document.getElementById("driverName").value="";
+document.getElementById("driverPhone").value="";
+document.getElementById("driverRoute").value="";
+}
+
+/* 🚐 DRIVERS LIVE */
+db.collection("veiculos")
+.where("empresaId","==",empresaId)
+.onSnapshot(snap=>{
+
+let html="";
+
+snap.forEach(doc=>{
+const d=doc.data();
+
+html+=`
+<div class="item">
+🚐 ${d.name}<br>
+📞 ${d.phone}<br>
+📍 ${d.route}<br>
+🟢 ${d.status}
+</div>
+`;
+});
+
+document.getElementById("drivers").innerHTML=html;
+
+});
+
+/* 📦 TRIPS + SIGNALS */
+db.collection("viagens")
+.onSnapshot(snap=>{
+
+let html="";
+
+snap.docChanges().forEach(change=>{
+
+const v=change.doc.data();
+
+if(change.type==="added"){
+addLog("📥 Nova viagem: " + v.userId);
+}
+
+if(change.type==="modified"){
+
+if(v.status==="aceite") addLog("🚐 Motorista aceitou viagem");
+if(v.status==="a_caminho") addLog("🚖 Motorista a caminho");
+if(v.status==="em_viagem") addLog("🚀 Viagem em andamento");
+if(v.status==="concluida") addLog("🏁 Viagem concluída");
+}
+
+html+=`
+<div class="item">
+👤 ${v.userId}<br>
+🚕 ${v.origem} → ${v.destino}<br>
+📊 ${v.status}<br>
+🚐 ${v.veiculoAtribuido || "sem veículo"}<br>
+👨‍✈️ ${v.motoristaId || "aguardando"}
+</div>
+`;
+
+});
+
+document.getElementById("trips").innerHTML=html;
+
+});
+
+</script>
+
+</body>
+</html>

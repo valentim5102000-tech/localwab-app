@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LocalWab Motorista</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+header{
+background:#020617;
+padding:15px;
+text-align:center;
+font-weight:bold;
+}
+
+.container{padding:15px;}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+.ride{
+background:#334155;
+padding:10px;
+border-radius:10px;
+margin-top:10px;
+}
+
+button{
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+margin-top:8px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.accept{background:#16a34a;color:white;}
+.start{background:#f59e0b;}
+.finish{background:#ef4444;color:white;}
+</style>
+</head>
+
+<body>
+
+<header>🚖 LOCALWAB MOTORISTA</header>
+
+<div class="container">
+
+<div class="card">
+<h3>📍 Viagens disponíveis</h3>
+<div id="rides">A carregar...</div>
+</div>
+
+<div class="card">
+<h3>🚐 Minha viagem atual</h3>
+<div id="currentRide">Nenhuma viagem ativa</div>
+</div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+apiKey:"AIzaSyDG44wGTJtdINCaVFCFxRJsninm-KwRTDI",
+authDomain:"localwabapp.firebaseapp.com",
+projectId:"localwabapp",
+storageBucket:"localwabapp.firebasestorage.app",
+messagingSenderId:"61456899292",
+appId:"1:61456899292:web:3f4dc071bcf74471ed2819"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+let motorista = null;
+
+/* AUTH MOTORISTA */
+auth.onAuthStateChanged(user=>{
+if(user){
+motorista = user;
+loadRides();
+loadCurrentRide();
+}
+});
+
+/* LISTAR VIAGENS PENDENTES */
+function loadRides(){
+
+db.collection("viagens")
+.where("status","==","pendente")
+.onSnapshot(snap=>{
+
+let html = "";
+
+snap.forEach(doc=>{
+
+const v = doc.data();
+
+html += `
+<div class="ride">
+📍 Origem: ${v.origemLat}, ${v.origemLng}<br>
+🎯 Destino: ${v.destino}
+
+<button class="accept" onclick="acceptRide('${doc.id}')">
+ACEITAR VIAGEM
+</button>
+</div>
+`;
+});
+
+document.getElementById("rides").innerHTML = html || "Sem viagens";
+
+});
+}
+
+/* ACEITAR VIAGEM */
+async function acceptRide(id){
+
+await db.collection("viagens").doc(id).update({
+status:"aceite",
+motoristaId: motorista.uid,
+motorista: motorista.email || motorista.uid,
+aceiteEm: Date.now()
+});
+
+}
+
+/* MINHAS VIAGENS */
+function loadCurrentRide(){
+
+db.collection("viagens")
+.where("motoristaId","==",motorista.uid)
+.onSnapshot(snap=>{
+
+let html = "";
+
+snap.forEach(doc=>{
+
+const v = doc.data();
+
+if(v.status !== "concluida"){
+
+html += `
+<div class="ride">
+
+📍 ${v.origemLat}, ${v.origemLng}<br>
+🎯 ${v.destino}<br>
+📊 Status: ${v.status}
+
+<button class="start" onclick="updateStatus('${doc.id}','a_caminho')">
+A CAMINHO
+</button>
+
+<button class="start" onclick="updateStatus('${doc.id}','em_viagem')">
+INICIAR
+</button>
+
+<button class="finish" onclick="updateStatus('${doc.id}','concluida')">
+CONCLUIR
+</button>
+
+</div>
+`;
+}
+
+});
+
+document.getElementById("currentRide").innerHTML = html || "Nenhuma viagem ativa";
+
+});
+
+}
+
+/* ATUALIZAR STATUS */
+async function updateStatus(id, status){
+
+await db.collection("viagens").doc(id).update({
+status: status
+});
+
+}
+
+</script>
+
+</body>
+</html>

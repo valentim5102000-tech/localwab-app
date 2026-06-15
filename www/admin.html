@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LocalWab ADMIN MASTER</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+header{
+background:#020617;
+padding:15px;
+text-align:center;
+font-weight:bold;
+font-size:18px;
+}
+
+.container{padding:15px;}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+.stat{
+font-size:18px;
+margin:5px 0;
+color:#22c55e;
+}
+
+.item{
+background:#334155;
+padding:10px;
+margin-top:8px;
+border-radius:8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>🛡️ LOCALWAB PAINEL ADMIN REAL TIME</header>
+
+<div class="container">
+
+<!-- STATS -->
+<div class="card">
+<h3>📊 Estatísticas</h3>
+
+<div class="stat" id="users">👤 Usuários: ...</div>
+<div class="stat" id="drivers">🚖 Motoristas: ...</div>
+<div class="stat" id="rides">🚐 Viagens: ...</div>
+<div class="stat" id="pending">⏳ Pendentes: ...</div>
+<div class="stat" id="active">🔥 Ativas: ...</div>
+
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalWab Admin Dashboard Completo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { margin:0; font-family:Arial; background:#0f172a; color:white;}
+header { background:#020617; padding:15px; display:flex; justify-content:space-between; align-items:center;}
+header h1 { margin:0; font-size:1.5rem;}
+button.logout { padding:5px 10px; background:#ef4444; color:white; border:none; border-radius:5px; cursor:pointer;}
+.container { padding:15px;}
+.card { background:#1e293b; padding:15px; border-radius:10px; margin-bottom:15px;}
+#map { height:300px; width:100%; border-radius:10px;}
+input, select { display:block; margin:5px 0; padding:5px; width:100%; max-width:300px; }
+button { padding:5px 10px; border:none; border-radius:5px; cursor:pointer; margin-top:5px; }
+button.addButton { background:#22c55e; color:white; }
+button.removeButton { background:#ef4444; color:white; }
+button.filterButton { background:#3b82f6; color:white; }
+canvas { background:#1e293b; margin-top:10px; border-radius:10px; padding:10px;}
+ul { list-style:none; padding-left:0;}
+.alert { background:#facc15; color:black; padding:5px; border-radius:5px; margin-bottom:5px;}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🚀 LocalWab Admin Completo</h1>
+<button class="logout" onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+
+<!-- Usuários -->
+<div class="card">
+<h3>👤 Gerenciamento de Usuários</h3>
+<input type="text" id="searchUser" placeholder="Buscar usuário" oninput="filterUsers()">
+<button class="filterButton" onclick="filterByStatus('ativo')">Ativos</button>
+<button class="filterButton" onclick="filterByStatus('expirado')">Expirados</button>
+<button class="filterButton" onclick="filterByStatus('bloqueado')">Bloqueados</button>
+<div id="userAlerts"></div>
+<ul id="users"></ul>
+<input type="text" id="newUser" placeholder="Número do usuário">
+<input type="number" id="newUserTime" placeholder="Tempo em minutos">
+<button class="addButton" onclick="addUser()">Adicionar Usuário</button>
+</div>
+
+<!-- Pagamentos -->
+<div class="card">
+<h3>💰 Pagamentos Detalhados</h3>
+<button class="filterButton" onclick="filterPayments('Todos')">Todos</button>
+<button class="filterButton" onclick="filterPayments('USSD')">USSD</button>
+<button class="filterButton" onclick="filterPayments('Multicaixa Express')">Multicaixa Express</button>
+<button class="filterButton" onclick="exportPaymentsCSV()">Exportar CSV</button>
+<ul id="payments"></ul>
+<input type="text" id="paymentNumber" placeholder="Número do usuário">
+<input type="number" id="paymentValue" placeholder="Valor KZ">
+<select id="paymentMethod">
+<option value="USSD">USSD</option>
+<option value="Multicaixa Express">Multicaixa Express</option>
+</select>
+<button class="addButton" onclick="addPayment()">Adicionar Pagamento</button>
+</div>
+
+<!-- Veículos -->
+<div class="card">
+<h3>🚌 Veículos em Tempo Real</h3>
+<div id="map"></div>
+<input type="text" id="vehicleName" placeholder="Nome do veículo">
+<input type="number" id="vehicleLat" placeholder="Latitude">
+<input type="number" id="vehicleLng" placeholder="Longitude">
+<select id="vehicleStatus">
+<option value="em movimento">Em movimento</option>
+<option value="parado">Parado</option>
+<option value="proximo">Próximo do usuário</option>
+</select>
+<select id="vehicleCompany">
+<option value="Impala">Impala</option>
+<option value="Tecul">Tecul</option>
+<option value="Rosalina">Rosalina</option>
+</select>
+<button class="addButton" onclick="addVehicle()">Adicionar Veículo</button>
+</div>
+
+<!-- Gráficos -->
+<div class="card">
+<h3>📈 Gráficos Avançados</h3>
+<canvas id="usersChart" width="400" height="200"></canvas>
+<canvas id="paymentsUSSDChart" width="400" height="200"></canvas>
+<canvas id="paymentsMulticaixaChart" width="400" height="200"></canvas>
+</div>
+
+<!-- Empresas -->
+<div class="card">
+<h3>🏢 Empresas e Transportes</h3>
+<input type="text" id="newCompany" placeholder="Nome da empresa">
+<button class="addButton" onclick="addCompany()">Adicionar Empresa</button>
+<select id="companyFilter">
+<option value="">Filtrar empresa</option>
+</select>
+</div>
+
+<!-- Alteração de senha admin -->
+<div class="card">
+<h3>🔑 Alterar Senha Admin</h3>
+<input type="text" id="newAdminUser" placeholder="Novo usuário">
+<input type="password" id="newAdminPass" placeholder="Nova senha">
+<button class="addButton" onclick="changeAdmin()">Salvar</button>
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// Logout
+function logout(){ window.location.href="index.html"; }
+
+// Admin
+let adminUser="valentim24";
+let adminPass="Valentim24@";
+function changeAdmin(){
+  let u=document.getElementById("newAdminUser").value.trim();
+  let p=document.getElementById("newAdminPass").value.trim();
+  if(u && p){ adminUser=u; adminPass=p; alert("Usuário e senha atualizados!"); document.getElementById("newAdminUser").value=""; document.getElementById("newAdminPass").value=""; }
+}
+
+// Dados simulados
+let users=[{numero:"940045782", expira:Date.now()+360000, pago:true, bloqueado:false},{numero:"923000111", expira:Date.now()-60000, pago:false, bloqueado:false}];
+let payments=[{numero:"940045782", valor:10, hora:"14:20", metodo:"USSD"},{numero:"923000111", valor:15, hora:"15:00", metodo:"USSD"},{numero:"940012345", valor:20, hora:"16:10", metodo:"Multicaixa Express"},{numero:"923098765", valor:30, hora:"17:25", metodo:"Multicaixa Express"}];
+let vehicles=[{nome:"Cidrália", lat:-8.8383, lng:13.2344, estado:"em movimento", velocidade:30, empresa:"Impala"},{nome:"Rosalina", lat:-8.85, lng:13.22, estado:"proximo", velocidade:10, empresa:"Rosalina"},{nome:"Tecul", lat:-8.82, lng:13.20, estado:"parado", velocidade:0, empresa:"Tecul"}];
+let companies=["Impala","Tecul","Rosalina"];
+
+// Usuários
+function renderUsers(){
+  let html=""; let alerts="";
+  users.forEach((u,i)=>{
+    let status=u.bloqueado?"bloqueado":(u.expira>Date.now()?"ativo":"expirado");
+    let tempo=Math.max(0,Math.floor((u.expira-Date.now())/60000));
+    let pago=u.pago?"✔️ Pago":"❌ Não Pago";
+    html+=`<li>${u.numero} - ${status} - Tempo: ${tempo} min - ${pago} 
+      <button onclick="toggleBloqueio(${i})">Bloquear/Desbloquear</button>
+      <button onclick="addTime(${i})">Adicionar Tempo</button>
+    </li>`;
+    if(status==="expirado" || !u.pago){ alerts+=`<div class="alert">⚠️ Usuário ${u.numero} precisa de atenção!</div>`; }
+  });
+  document.getElementById("users").innerHTML=html;
+  document.getElementById("userAlerts").innerHTML=alerts;
+}
+function addUser(){ let n=document.getElementById("newUser").value.trim(); let t=Number(document.getElementById("newUserTime").value); if(n){ users.push({numero:n, expira:Date.now()+t*60000, pago:false, bloqueado:false}); document.getElementById("newUser").value=""; document.getElementById("newUserTime").value=""; renderUsers(); renderStats(); renderCharts(); } }
+function toggleBloqueio(i){ users[i].bloqueado=!users[i].bloqueado; renderUsers(); }
+function addTime(i){ let t=prompt("Minutos a adicionar:"); t=Number(t); if(!isNaN(t)) users[i].expira+=t*60000; renderUsers(); }
+function filterUsers(){ let termo=document.getElementById("searchUser").value.trim(); let html=""; users.filter(u=>u.numero.includes(termo)).forEach((u,i)=>{ let status=u.bloqueado?"bloqueado":(u.expira>Date.now()?"ativo":"expirado"); let tempo=Math.max(0,Math.floor((u.expira-Date.now())/60000)); let pago=u.pago?"✔️ Pago":"❌ Não Pago"; html+=`<li>${u.numero} - ${status} - Tempo: ${tempo} min - ${pago} <button onclick="toggleBloqueio(${i})">Bloquear/Desbloquear</button><button onclick="addTime(${i})">Adicionar Tempo</button></li>`; }); document.getElementById("users").innerHTML=html; }
+function filterByStatus(status){ let html=""; users.forEach((u,i)=>{ let userStatus=u.bloqueado?"bloqueado":(u.expira>Date.now()?"ativo":"expirado"); if(userStatus===status){ let tempo=Math.max(0,Math.floor((u.expira-Date.now())/60000)); let pago=u.pago?"✔️ Pago":"❌ Não Pago"; html+=`<li>${u.numero} - ${userStatus} - Tempo: ${tempo} min - ${pago} <button onclick="toggleBloqueio(${i})">Bloquear/Desbloquear</button><button onclick="addTime(${i})">Adicionar Tempo</button></li>`; }}); document.getElementById("users").innerHTML=html; }
+
+// Pagamentos
+function renderPayments(filter="Todos"){ let html=""; payments.forEach((p,i)=>{ if(filter==="Todos"||p.metodo===filter){ html+=`<li>${p.numero} - ${p.valor} KZ - ${p.metodo} - Hora: ${p.hora} <button onclick="removePayment(${i})">❌</button></li>`; } }); document.getElementById("payments").innerHTML=html; }
+function addPayment(){ let num=document.getElementById("paymentNumber").value.trim(); let val=Number(document.getElementById("paymentValue").value); let met=document.getElementById("paymentMethod").value; if(num&&val){ payments.push({numero:num, valor:val, hora:new Date().toLocaleTimeString(), metodo:met}); document.getElementById("paymentNumber").value=""; document.getElementById("paymentValue").value=""; renderPayments(); renderStats(); renderCharts(); } }
+function removePayment(i){ payments.splice(i,1); renderPayments(); renderStats(); renderCharts(); }
+function filterPayments(m){ renderPayments(m); }
+function exportPaymentsCSV(){ let csv="Número,Valor,Hora,Método\n"; payments.forEach(p=>{ csv+=`${p.numero},${p.valor},${p.hora},${p.metodo}\n`; }); let blob=new Blob([csv],{type:"text/csv"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="pagamentos.csv"; a.click(); }
+
+// Veículos
+let map, vehicleMarkers=[];
+function initMap(){ map=L.map('map').setView([-8.8383,13.2344],13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); renderVehicleMarkers(); }
+function renderVehicleMarkers(){ vehicleMarkers.forEach(m=>map.removeLayer(m)); vehicleMarkers=[]; vehicles.forEach(v=>{ let m=L.marker([v.lat,v.lng]).addTo(map).bindPopup(`${v.nome} - ${v.estado} - ${v.velocidade} km/h - ${v.empresa}`); vehicleMarkers.push(m); }); }
+function addVehicle(){ let n=document.getElementById("vehicleName").value.trim(); let lat=parseFloat(document.getElementById("vehicleLat").value); let lng=parseFloat(document.getElementById("vehicleLng").value); let st=document.getElementById("vehicleStatus").value; let comp=document.getElementById("vehicleCompany").value; if(n&&!isNaN(lat)&&!isNaN(lng)){ vehicles.push({nome:n,lat:lat,lng:lng,estado:st,velocidade:st==="parado"?0:Math.floor(Math.random()*50),empresa:comp}); document.getElementById("vehicleName").value=""; document.getElementById("vehicleLat").value=""; document.getElementById("vehicleLng").value=""; renderVehicleMarkers(); } }
+// Atualização automática
+setInterval(()=>{ vehicles.forEach(v=>{ if(v.estado==="em movimento"){ v.lat+=Math.random()*0.001-0.0005; v.lng+=Math.random()*0.001-0.0005; } }); renderVehicleMarkers(); },5000);
+
+// Estatísticas
+function renderStats(){ document.getElementById("stats").innerHTML=`<li>Usuários: ${users.length}</li><li>Ganhos: ${payments.reduce((s,p)=>s+p.valor,0)} KZ</li><li>Veículos Ativos: ${vehicles.length}</li>`; }
+
+// Empresas
+function addCompany(){ let c=document.getElementById("newCompany").value.trim(); if(c&&!companies.includes(c)){ companies.push(c); document.getElementById("newCompany").value=""; let sel=document.getElementById("companyFilter"); let opt=document.createElement("option"); opt.value=c; opt.innerText=c; sel.appendChild(opt); alert("Empresa adicionada!"); } }
+
+// Gráficos
+let usersChart,
+function renderCharts(){
+  const ctxUsers=document.getElementById('usersChart').getContext('2d');
+  usersChart=new Chart(ctxUsers,{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{label:'Usuários ativos por dia',data:[users.length,5,3,4,6,5,7],borderColor:'rgba(34,197,94,1)',backgroundColor:'rgba(34,197,94,0.2)',fill:true,tension:0.3}]}});
+
+</script>
+
+</body>
+</html>
+
+<!-- USERS -->
+<div class="card">
+<h3>👤 Usuários</h3>
+<div id="usersList"></div>
+</div>
+
+<!-- RIDES -->
+<div class="card">
+<h3>🚐 Viagens</h3>
+<div id="ridesList"></div>
+</div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+apiKey:"AIzaSyDG44wGTJtdINCaVFCFxRJsninm-KwRTDI",
+authDomain:"localwabapp.firebaseapp.com",
+projectId:"localwabapp",
+storageBucket:"localwabapp.firebasestorage.app",
+messagingSenderId:"61456899292",
+appId:"1:61456899292:web:3f4dc071bcf74471ed2819"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+/* ================= STATS REAL TIME ================= */
+
+function loadStats(){
+
+db.collection("usuarios").onSnapshot(snap=>{
+document.getElementById("users").innerText="👤 Usuários: "+snap.size;
+});
+
+db.collection("viagens").onSnapshot(snap=>{
+
+let pendentes = 0;
+let ativas = 0;
+
+snap.forEach(doc=>{
+const v = doc.data();
+
+if(v.status === "pendente") pendentes++;
+if(v.status === "aceite" || v.status === "a_caminho") ativas++;
+});
+
+document.getElementById("rides").innerText="🚐 Viagens: "+snap.size;
+document.getElementById("pending").innerText="⏳ Pendentes: "+pendentes;
+document.getElementById("active").innerText="🔥 Ativas: "+ativas;
+
+});
+
+db.collection("veiculos").onSnapshot(snap=>{
+document.getElementById("drivers").innerText="🚖 Motoristas: "+snap.size;
+});
+
+}
+
+/* ================= USERS ================= */
+
+function loadUsers(){
+
+db.collection("usuarios")
+.onSnapshot(snap=>{
+
+document.getElementById("usersList").innerHTML="";
+
+snap.forEach(doc=>{
+
+const u = doc.data();
+
+document.getElementById("usersList").innerHTML += `
+<div class="item">
+📧 ${u.email || "sem email"}<br>
+👤 ${u.tipo || "user"}
+</div>
+`;
+
+});
+
+});
+
+}
+
+/* ================= RIDES ================= */
+
+function loadRides(){
+
+db.collection("viagens")
+.onSnapshot(snap=>{
+
+document.getElementById("ridesList").innerHTML="";
+
+snap.forEach(doc=>{
+
+const v = doc.data();
+
+document.getElementById("ridesList").innerHTML += `
+<div class="item">
+📍 ${v.origem} → ${v.destino}<br>
+📊 ${v.status}<br>
+👨‍✈️ ${v.motorista || "sem motorista"}
+</div>
+`;
+
+});
+
+});
+
+}
+
+/* START */
+loadStats();
+loadUsers();
+loadRides();
+
+</script>
+
+</body>
+</html>
