@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "61456899292",
+    "firebase_url": "https://localwabapp-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "localwabapp",
+    "storage_bucket": "localwabapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61456899292:android:b241b38ee41f4f73ed2819",
+        "android_client_info": {
+          "package_name": "com.localwab.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "61456899292-j28kngglvburjg6m4lhsnd6mac99sj16.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3zFXwWIeTiDt15zfM7FCm7BdrM2fLHes"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61456899292-j28kngglvburjg6m4lhsnd6mac99sj16.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
